@@ -10,4 +10,10 @@
 
 @interface SquaresView : ScreenSaverView
 
+@property double **sizePhase;
+@property double **colorPhase;
+@property double **alphaTime;
+@property double time;
+@property double baseSize;
+
 @end
