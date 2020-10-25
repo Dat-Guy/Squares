@@ -14,7 +14,7 @@
 {
     self = [super initWithFrame:frame isPreview:isPreview];
     if (self) {
-        [self setAnimationTimeInterval:1/30.0];
+        [self setAnimationTimeInterval:1/60.0];
         
         // Setup program primatives
 //        if (isPreview){
@@ -58,30 +58,29 @@
 
 - (void)drawRect:(NSRect)rect
 {
-    NSBezierPath *back = [NSBezierPath bezierPathWithRect:[self bounds]];
-    [[NSColor colorWithWhite:0.05 alpha:1] set];
-    [back fill];
-    
-    NSBezierPath *path = [NSBezierPath bezierPath];
+    CGContextRef contextRef = [[NSGraphicsContext currentContext] CGContext];
+    CGContextFillRect(contextRef, [self bounds]);
     
     double fade = 1.0 / (1.0 + pow(M_E, -2.0 * self.time + 5));
     
     for (int i = 0; i < [self bounds].size.width / self.baseSize; i++){
         for (int j = 0; j < [self bounds].size.height / self.baseSize; j++){
-            [[NSColor colorWithRed:sin(self.colorPhase[i][j] + self.time)
+            CGContextSetRGBFillColor(contextRef, sin(self.colorPhase[i][j] + self.time), cos(self.colorPhase[i][j] + self.time / 2), sin(self.colorPhase[i][j] + self.time * 3), cos(self.colorPhase[i][j] + self.time * self.alphaTime[i][j]) * fade);
+            /*[[NSColor colorWithRed:sin(self.colorPhase[i][j] + self.time)
                              green:cos(self.colorPhase[i][j] + self.time / 2)
                               blue:sin(self.colorPhase[i][j] + self.time * 3)
-                             alpha:cos(self.colorPhase[i][j] + self.time * self.alphaTime[i][j]) * fade] set];
+                             alpha:cos(self.colorPhase[i][j] + self.time * self.alphaTime[i][j]) * fade] set];*/
             double size = self.baseSize * (1 + sin(self.sizePhase[i][j] + self.time / 5));
-            [path appendBezierPathWithRect:NSMakeRect(i * self.baseSize - (size - self.baseSize) / 2, j * self.baseSize - (size - self.baseSize) / 2, size, size)];
-            [path fill];
-            [path removeAllPoints];
+            CGContextFillRect(contextRef, CGRectMake(i * self.baseSize - (size - self.baseSize) / 2, j * self.baseSize - (size - self.baseSize) / 2, size, size));
+            /*[path appendBezierPathWithRect:NSMakeRect(i * self.baseSize - (size - self.baseSize) / 2, j * self.baseSize - (size - self.baseSize) / 2, size, size)];*/
         }
     }
     
-    self.time += sin(self.time) * cos(self.time) / 50 + 0.02;
     
-    [self setNeedsDisplay:YES];
+    
+    self.time += sin(self.time) * cos(self.time) / 75 + 0.01;
+    
+    CGContextSynchronize(contextRef);
 }
 
 - (void)animateOneFrame
